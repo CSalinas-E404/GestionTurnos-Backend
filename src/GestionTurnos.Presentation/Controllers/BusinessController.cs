@@ -1,4 +1,4 @@
-﻿using GestionTurnos.Aplication.Abstraction;
+﻿using GestionTurnos.Application.Abstraction;
 using GestionTurnos.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 

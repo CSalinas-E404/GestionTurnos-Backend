@@ -1,7 +1,6 @@
-using GestionTurnos.Aplication.Abstraction;
-using GestionTurnos.Aplication.Abstraction.Infrastructure;
-using GestionTurnos.Aplication.Services;
-using GestionTurnos.Domain.Entities;
+using GestionTurnos.Application.Abstraction;
+using GestionTurnos.Application.Abstraction.Infrastructure;
+using GestionTurnos.Application.Services;
 using GestionTurnos.Infrastructure.Persistance;
 using GestionTurnos.Infrastructure.Persistance.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddOpenApi();
-builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(StaffRepository<>));
-builder.Services.AddScoped(typeof(StaffRepository<>), typeof(StaffRepository<>));
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+builder.Services.AddScoped(typeof(BaseRepository<>), typeof(BaseRepository<>));
+builder.Services.AddScoped<IBusinessRepository, BusinessRepository>();
 builder.Services.AddScoped<IStaffRepository, StaffRepository>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IBusinessService, BusinessService>();

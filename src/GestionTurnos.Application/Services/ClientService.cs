@@ -1,12 +1,8 @@
-﻿using GestionTurnos.Aplication.Abstraction;
-using GestionTurnos.Aplication.Abstraction.Infrastructure;
-using GestionTurnos.Aplication.Request;
+﻿using GestionTurnos.Application.Abstraction;
+using GestionTurnos.Application.Abstraction.Infrastructure;
 using GestionTurnos.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace GestionTurnos.Aplication.Services
+namespace GestionTurnos.Application.Services
 {
     public class ClientService : IClientService
     {
@@ -15,34 +11,36 @@ namespace GestionTurnos.Aplication.Services
         {
             _clientRepository = clientRepository;
         }
-        public Client CreateClient(BusinessRequest request, Guid id_Business)
+        public Client CreateClient(Client client)
         {
-            throw new NotImplementedException();
+            return _clientRepository.Add(client);
         }
 
-        public Client CreateUser(BusinessRequest request)
+        public void DeleteClient(Guid id)
         {
-            throw new NotImplementedException();
-        }
-
-        public bool DeleteUser(Guid id)
-        {
-            throw new NotImplementedException();
+             _clientRepository.Delete(id);
         }
 
         public List<Client> GetAll()
         {
-            throw new NotImplementedException();
+            return _clientRepository.GetAll();
         }
 
         public Client GetById(Guid id)
         {
-            throw new NotImplementedException();
+            var existingClient = _clientRepository.GetById(id) ?? throw new Exception("Cliente no encontrado");
+            return existingClient;
         }
 
-        public Client UpdateUser(Client user)
+        public List<Client> GetClientsOfBusiness(Guid businessId)
         {
-            throw new NotImplementedException();
+           return _clientRepository.GetClientsOfBusiness(businessId);
+        }
+
+        public void UpdateClient(Client client)
+        {
+            var existingClient = _clientRepository.GetById(client.Id) ?? throw new Exception("Cliente no encontrado");
+            _clientRepository.Update(client);
         }
     }
 }

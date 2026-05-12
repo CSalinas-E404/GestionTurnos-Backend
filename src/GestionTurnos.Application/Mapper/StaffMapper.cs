@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace GestionTurnos.Aplication.Mapper
+namespace GestionTurnos.Application.Mapper
 {
     internal class StaffMapper
     {

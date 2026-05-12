@@ -1,6 +1,6 @@
 ﻿using GestionTurnos.Domain.Entities;
 
-namespace GestionTurnos.Aplication.Abstraction
+namespace GestionTurnos.Application.Abstraction
 {
     public interface IBusinessService
     {
