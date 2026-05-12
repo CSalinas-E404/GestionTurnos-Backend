@@ -1,10 +1,16 @@
-﻿using GestionTurnos.Aplication.Abstraction;
+﻿using GestionTurnos.Application.Abstraction;
+using GestionTurnos.Application.Abstraction.Infrastructure;
 using GestionTurnos.Domain.Entities;
 
-namespace GestionTurnos.Aplication.Services
+namespace GestionTurnos.Application.Services
 {
     public class BusinessService : IBusinessService
     {
+        private readonly IBusinessRepository _businessRepository;
+        public BusinessService(IBusinessRepository businessRepository)
+        {
+            _businessRepository = businessRepository;
+        }
         /*
          public List<Business> GetAll()
          {
@@ -45,27 +51,31 @@ namespace GestionTurnos.Aplication.Services
          }*/
         public Business Create(Business business)
         {
-            throw new NotImplementedException();
+            _businessRepository.Add(business);
+            return business;
         }
 
         public bool Delete(Guid id)
         {
-            throw new NotImplementedException();
+
+            _businessRepository.Delete(id);
+            return true;
         }
 
         public List<Business> GetAll()
         {
-            throw new NotImplementedException();
+            return _businessRepository.GetAll();
         }
 
         public Business GetById(Guid id)
         {
-            throw new NotImplementedException();
+
+            return _businessRepository.GetById(id);
         }
 
-        public Business Update(Guid id, string value)
+        public void Update(Guid id, string value)
         {
-            throw new NotImplementedException();
+           _businessRepository.Update(value);
         }
     }
 }

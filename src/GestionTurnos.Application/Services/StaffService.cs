@@ -1,24 +1,20 @@
-﻿using GestionTurnos.Aplication.Abstraction;
-using GestionTurnos.Aplication.Abstraction.Infrastructure;
-using GestionTurnos.Aplication.Request;
+﻿using GestionTurnos.Application.Abstraction;
+using GestionTurnos.Application.Abstraction.Infrastructure;
+using GestionTurnos.Application.Request;
 using GestionTurnos.Domain.Entities;
 
-namespace GestionTurnos.Aplication.Services
+namespace GestionTurnos.Application.Services
 {
     public class StaffService : IStaffService
     {
 
         private readonly IStaffRepository _staffRepository;
-        private readonly I
-        public StaffService(IStaffRepository staffRepository)
+        private readonly IBusinessRepository _businessRepository;
+        public StaffService(IStaffRepository staffRepository, IBusinessRepository businessRepository)
         {
             _staffRepository = staffRepository;
-        }
-
-
-
-        // Lista estática para persistir datos en memoria durante la ejecución
-        
+            _businessRepository = businessRepository;
+        }      
          public Staff CreateStaff(BusinessRequest request, Guid id_Business)
          {
 
@@ -39,7 +35,7 @@ namespace GestionTurnos.Aplication.Services
              return newStaff;
          }
 
-         public Staff CreateUser(BusinessRequest request)
+         public Staff CreateStaffWhitBusiness(BusinessRequest request)
          {
 
              var newBusiness = new Business
@@ -63,19 +59,17 @@ namespace GestionTurnos.Aplication.Services
              };
 
              _staffRepository.Add(newUser);
-            // Add the Repository of Business (Micael)
+            _businessRepository.Add(newBusiness);
 
-             return newUser;
+            return newUser;
          }
 
 
-         public void DeleteUser(Guid id)
+         public void DeleteStaff(Guid id)
          {
-              _staffRepository.Delete(id);
+            var User = _staffRepository.GetById(id) ?? throw new Exception("Usuario no encontrado");
+            _staffRepository.Delete(id);
          }
-
-         // Si tu interfaz devuelve 'User' (singular), devolverá el primero de la lista.
-         // Si debería ser una lista, cambia el retorno a List<User> en la Interfaz.
          public List<Staff> GetAll()
          {
              return _staffRepository.GetAll();
@@ -83,14 +77,15 @@ namespace GestionTurnos.Aplication.Services
 
          public Staff? GetById(Guid id)
          {
-             return _staffRepository.GetById(id);
+            var existingUser = _staffRepository.GetById(id) ?? throw new Exception("Usuario no encontrado");
+
+            return _staffRepository.GetById(id);
          }
 
-         public Staff UpdateUser(Staff user, Rol? rol)
+         public Staff UpdateStaff(Staff user, Rol? rol)
          {
-             var existingUser = _staffRepository.GetById(user.Id);
-             if (existingUser != null)
-             {
+            var existingUser = _staffRepository.GetById(user.Id) ?? throw new Exception("Usuario no encontrado");
+  
                  existingUser.Name = user.Name;
                  existingUser.Email = user.Email;
                  existingUser.Phone = user.Phone;
@@ -102,8 +97,7 @@ namespace GestionTurnos.Aplication.Services
                  }
 
                  return existingUser;
-             }
-             throw new Exception("Usuario no encontrado");
+        
          }
        
     }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace GestionTurnos.Aplication.Request
+namespace GestionTurnos.Application.Request
 {
     public class BusinessRequest
     {

@@ -1,5 +1,5 @@
-﻿using GestionTurnos.Aplication.Abstraction;
-using GestionTurnos.Aplication.Abstraction.Infrastructure;
+﻿using GestionTurnos.Application.Abstraction;
+using GestionTurnos.Application.Abstraction.Infrastructure;
 using GestionTurnos.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
