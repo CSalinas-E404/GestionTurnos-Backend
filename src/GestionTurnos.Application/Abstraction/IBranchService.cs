@@ -7,6 +7,6 @@ namespace GestionTurnos.Application.Abstraction
 {
     public interface IBranchService
     {
-        bool CreateBranch(Branch Branch);
+        // bool CreateBranch(Branch Branch);
     }
 }

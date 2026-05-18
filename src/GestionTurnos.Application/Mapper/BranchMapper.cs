@@ -13,7 +13,6 @@ namespace GestionTurnos.Application.Mapper
                 Address = branch.Address,
                 Phone = branch.Phone,
                 City = branch.City
-
             };
         }
     }

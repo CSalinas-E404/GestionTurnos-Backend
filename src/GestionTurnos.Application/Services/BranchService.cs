@@ -1,10 +1,9 @@
-﻿using GestionTurnos.Application.Abstraction.Infrastructure;
+﻿using GestionTurnos.Application.Abstraction;
+using GestionTurnos.Application.Abstraction.Infrastructure;
 using GestionTurnos.Application.Mapper;
 using GestionTurnos.Application.Response;
 using GestionTurnos.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace GestionTurnos.Application.Services
 {
@@ -17,14 +16,12 @@ namespace GestionTurnos.Application.Services
             _branchRepository = branchRepository;
         }
 
-        public List<BranchResponse> GetAll()
+        public List<BranchResponse> GetByBusinessId( Guid businessId)
         {
-            return _branchRepository
-                .GetAll()
+            return _branchRepository.GetByBusinessId(businessId)
                 .OrderBy(x => x.Name)
                 .Select(x => x.ToBranchResponse())
                 .ToList();
         }
-        
     }
 }
