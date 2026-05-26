@@ -1,5 +1,6 @@
 ﻿using GestionTurnos.Application.Abstraction.Infrastructure;
 using GestionTurnos.Domain.Entities;
+using GestionTurnos.Infrastructure.Persistence;
 
 namespace GestionTurnos.Infrastructure.Persistance.Repository
 {
