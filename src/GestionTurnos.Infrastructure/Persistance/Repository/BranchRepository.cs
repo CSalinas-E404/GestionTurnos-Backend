@@ -9,5 +9,19 @@ namespace GestionTurnos.Infrastructure.Persistance.Repository
         public BranchRepository(FMCTurnosDbContext context) : base(context)
         {
         }
+
+        public override List<Branch> GetAll()
+        {
+            return _context.Branches
+                .Where(x => !x.IsDeleted)
+                .ToList();
+        }
+
+        public List<Branch> GetByBusinessId(Guid businessId)
+        {
+            return _context.Branches
+                .Where(x => x.BusinessId == businessId)
+                .ToList();
+        }
     }
 }

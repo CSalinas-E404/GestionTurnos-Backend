@@ -1,5 +1,7 @@
 ﻿using GestionTurnos.Application.Abstraction;
 using GestionTurnos.Application.Abstraction.Infrastructure;
+using GestionTurnos.Application.Mapper;
+using GestionTurnos.Application.Response;
 using GestionTurnos.Domain.Entities;
 using System;
 using System.Collections.Generic;
