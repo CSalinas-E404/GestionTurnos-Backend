@@ -30,12 +30,12 @@ namespace GestionTurnos.Presentation.Controllers
             return Ok(_staffService.GetById(id));
         }
 
-        [HttpPost]
-        public ActionResult<Staff> CreateStaffWhitBusiness([FromBody] BusinessRequest user)
-        {
-            var newUser = _staffService.CreateStaffWhitBusiness(user);
-            return CreatedAtAction(nameof(GetById), new { id = newUser.Id }, newUser);
-        }
+        //[HttpPost]
+        //public ActionResult<Staff> CreateStaffWhitBusiness([FromBody] BusinessRequest user)
+        //{
+        //    var newUser = _staffService.CreateStaffWhitBusiness(user);
+        //    return CreatedAtAction(nameof(GetById), new { id = newUser.Id }, newUser);
+        //}
 
         [HttpDelete("{id}")]
         public ActionResult DeleteStaff(Guid id)
@@ -45,11 +45,11 @@ namespace GestionTurnos.Presentation.Controllers
         }
 
         // [Authorize(Policy = "Admin")]
-        [HttpPut]
-        public ActionResult<Staff> UpdateStaff([FromBody] Staff user)
-        {
-            var updatedUser = _staffService.UpdateStaff(user);
-            return Ok(updatedUser);
-        }
+        //[HttpPut]
+        //public ActionResult<Staff> UpdateStaff([FromBody] Staff user)
+        //{
+        //   var updatedUser = _staffService.UpdateStaff(user);
+        //    return Ok(updatedUser);
+        //}
     }
 }
