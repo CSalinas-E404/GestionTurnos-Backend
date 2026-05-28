@@ -88,6 +88,21 @@ namespace GestionTurnos.Application.Services
             return fullyLoaded.ToResponse();
         }
 
+        public AppointmentResponse UpdateStatus(Guid id, GestionTurnos.Domain.Entities.AppointmentStatus newStatus)
+        {
+            var existing = _appointmentRepository.GetById(id) 
+                ?? throw new Exception("Turno no encontrado.");
+
+            existing.Status = newStatus;
+            
+            _appointmentRepository.Update(existing);
+
+            var fullyLoaded = _appointmentRepository.GetById(id) 
+                ?? throw new Exception("Error al recargar el turno actualizado.");
+
+            return fullyLoaded.ToResponse();
+        }
+
         public void DeleteAppointment(Guid id)
         {
             var existing = _appointmentRepository.GetById(id) 

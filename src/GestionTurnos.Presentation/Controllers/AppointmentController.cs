@@ -42,6 +42,13 @@ namespace GestionTurnos.Presentation.Controllers
             return Ok(appointment);
         }
 
+        [HttpPatch("{id}/status")]
+        public ActionResult UpdateStatus(Guid id, [FromBody] UpdateAppointmentStatusRequest request)
+        {
+            var appointment = _appointmentService.UpdateStatus(id, request.Status);
+            return Ok(appointment);
+        }
+
         [HttpDelete("{id}")]
         public ActionResult Delete(Guid id)
         {

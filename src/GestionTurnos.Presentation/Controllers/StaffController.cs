@@ -38,10 +38,10 @@ namespace GestionTurnos.Presentation.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Staff> CreateStaffWhitBusiness([FromBody] BusinessRequest user)
+        public ActionResult<StaffsResponse> CreateStaff([FromBody] StaffRequest user)
         {
-            var newUser = _staffService.CreateStaffWhitBusiness(user);
-            return CreatedAtAction(nameof(GetById), new { id = newUser.Id }, newUser);
+            var newUser = _staffService.CreateStaff(user);
+            return CreatedAtAction(nameof(GetStaffOfBusiness), null, newUser);
         }
 
         [HttpDelete("{id}")]
@@ -52,10 +52,10 @@ namespace GestionTurnos.Presentation.Controllers
         }
 
         // [Authorize(Policy = "Admin")]
-        [HttpPut]
-        public ActionResult<Staff> UpdateStaff([FromBody] Staff user)
+        [HttpPut("{id}")]
+        public ActionResult<StaffsResponse> UpdateStaff([FromBody] StaffRequest user, [FromRoute] Guid id)
         {
-            var updatedUser = _staffService.UpdateStaff(user);
+            var updatedUser = _staffService.UpdateStaff(user, id);
             return Ok(updatedUser);
         }
     }
