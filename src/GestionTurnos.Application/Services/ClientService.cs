@@ -1,5 +1,9 @@
 ﻿using GestionTurnos.Application.Abstraction;
 using GestionTurnos.Application.Abstraction.Infrastructure;
+using GestionTurnos.Application.Exceptions;
+using GestionTurnos.Application.Mapper;
+using GestionTurnos.Application.Request;
+using GestionTurnos.Application.Response;
 using GestionTurnos.Domain.Entities;
 
 namespace GestionTurnos.Application.Services
@@ -7,52 +11,79 @@ namespace GestionTurnos.Application.Services
     public class ClientService : IClientService
     {
         private readonly IClientRepository _clientRepository;
+
         public ClientService(IClientRepository clientRepository)
         {
             _clientRepository = clientRepository;
         }
-        public Client CreateClient(Client client)
+
+        public ClientsResponse CreateClient(ClientRequest request)
         {
-            return _clientRepository.Add(client);
+          
+            var client = request.ToEntity(); // Mapper
+
+            _clientRepository.Add(client);
+
+            return client.ToResponse();
+        }
+
+        public List<ClientsResponse> GetClientsOfCurrentBusiness()
+        {
+            var clients = _clientRepository.GetAllGlobal();
+            return clients.Select(c => c.ToResponse()).ToList();
+        }
+
+        public ClientsResponse GetById(Guid id)
+        {
+            var client = _clientRepository.GetById(id)
+                ?? throw new ConflictException("Cliente no encontrado o no pertenece a su comercio.");
+            return client.ToResponse();
+        }
+
+        public ClientsResponse GetByName(string name)
+        {
+            var client = _clientRepository.GetClientByName(name)
+                ?? throw new ConflictException("Cliente no encontrado en su comercio.");
+            return client.ToResponse();
+        }
+
+        public ClientsResponse GetByEmail(string email)
+        {
+            var client = _clientRepository.GetClientByEmail(email)
+                ?? throw new ConflictException("Cliente no encontrado en su comercio.");
+            return client.ToResponse();
+        }
+
+        public void UpdateClient(ClientRequest request, Guid id)
+        {
+            var existingClient = _clientRepository.GetById(id)
+                ?? throw new ConflictException("Cliente no encontrado.");
+
+            
+            existingClient.UpdateFromDto(request);
+
+            
+            _clientRepository.Update(existingClient);
         }
 
         public void DeleteClient(Guid id)
         {
-             _clientRepository.Delete(id);
+            var existingClient = _clientRepository.GetById(id)
+                ?? throw new ConflictException("Cliente no encontrado.");
+            if (existingClient.IsDeleted)
+            {
+                throw new ConflictException("El cliente ya se encuentra eliminado.");
+            }   
+
+            _clientRepository.Delete(id);
         }
 
-        public List<Client> GetAll()
-        {
-            return _clientRepository.GetAll();
-        }
 
-        public Client GetById(Guid id)
+        public List<GlobalClientResponse> GetAllGlobal()
         {
-            var existingClient = _clientRepository.GetById(id) ?? throw new Exception("Cliente no encontrado");
-            return existingClient;
-        }
-
-        public Client GetByName(string name)
-        {
-            var existingClient = _clientRepository.GetClientByName(name) ?? throw new Exception("Cliente no encontrado");
-            return existingClient;
-        }
-
-        public Client GetByNameForBusiness(string name, Guid businessId)
-        {
-            var existingClient = _clientRepository.GetClientByNameForBusiness(name,businessId) ?? throw new Exception("Cliente no encontrado");
-            return existingClient;
-        }
-
-        public List<Client> GetClientsOfBusiness(Guid businessId)
-        {
-           return _clientRepository.GetClientsOfBusiness(businessId);
-        }
-
-        public void UpdateClient(Client client)
-        {
-            var existingClient = _clientRepository.GetById(client.Id) ?? throw new Exception("Cliente no encontrado");
-            _clientRepository.Update(client);
+            var allClients = _clientRepository.GetAllGlobal();
+  
+            return allClients.Select(c => c.ToGlobalResponse()).ToList();
         }
     }
 }

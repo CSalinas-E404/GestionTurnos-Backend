@@ -2,7 +2,7 @@
 
 namespace GestionTurnos.Domain.Entities
 {
-    public enum Status { Habilitado,Deshabilitado }
+    public enum StatusBusiness { Habilitado,Deshabilitado }
     public enum TypeBusiness { Barberia, Spa}
     public class Business : BaseEntity
     {
@@ -11,7 +11,7 @@ namespace GestionTurnos.Domain.Entities
         [Required]
         public string Url { get; set; } = string.Empty;
         public string? UrlLogo { get; set; }
-        public bool IsActive { get; set; } = true;
+        public StatusBusiness IsActive { get; set; } = StatusBusiness.Habilitado;
         public TypeBusiness TypeBusiness { get; set; }
 
         // Propiedad de navegación inversa: Un negocio tiene muchas sucursales
@@ -19,6 +19,10 @@ namespace GestionTurnos.Domain.Entities
 
         // Relación con Clientes
         public virtual ICollection<Client> Clients { get; set; } = new List<Client>();
+
+        public virtual ICollection<Service> Services { get; set; } = new List<Service>();
+
+
 
     }
 }

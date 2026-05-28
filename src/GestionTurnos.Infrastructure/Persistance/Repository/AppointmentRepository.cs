@@ -1,8 +1,10 @@
 using GestionTurnos.Application.Abstraction.Infrastructure;
 using GestionTurnos.Domain.Entities;
+using GestionTurnos.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace GestionTurnos.Infrastructure.Persistance.Repository
@@ -12,7 +14,7 @@ namespace GestionTurnos.Infrastructure.Persistance.Repository
         public AppointmentRepository(FMCTurnosDbContext context) : base(context)
         {
         }
-        public override List<Appointment> GetAll()
+        public List<Appointment> GetAll()
         {
             return _dbSet
                 .Include(a => a.Client)
@@ -31,7 +33,7 @@ namespace GestionTurnos.Infrastructure.Persistance.Repository
                 .FirstOrDefault(a => a.Id == id && !a.IsDeleted);
         }
 
-        public bool ExistsOverlappingAppointment(Guid staffId, DateTime startTime, DateTime endTime, Guid? excludeAppointmentId = null)
+        public bool ExistsOverlappingAppointment(Guid staffId, TimeSpan startTime, TimeSpan endTime, Guid? excludeAppointmentId = null)
         {
             return _dbSet.Any(a => !a.IsDeleted &&
                                    a.Id != excludeAppointmentId &&
@@ -40,7 +42,7 @@ namespace GestionTurnos.Infrastructure.Persistance.Repository
                                    a.EndTime > startTime);
         }
 
-        public bool ExistsOverlappingAppointmentForClient(Guid clientId, DateTime startTime, DateTime endTime, Guid? excludeAppointmentId = null)
+        public bool ExistsOverlappingAppointmentForClient(Guid clientId, TimeSpan startTime, TimeSpan endTime, Guid? excludeAppointmentId = null)
         {
             return _dbSet.Any(a => !a.IsDeleted &&
                                    a.Id != excludeAppointmentId &&

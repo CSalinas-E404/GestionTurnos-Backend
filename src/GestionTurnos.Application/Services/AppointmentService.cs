@@ -33,14 +33,14 @@ namespace GestionTurnos.Application.Services
 
         public AppointmentResponse CreateAppointment(AppointmentRequest request)
         {
-            var endTime = request.StartTime.AddHours(1);
+            var endTime = request.StartTime.TimeOfDay.Add(TimeSpan.FromHours(1));
 
-            if (_appointmentRepository.ExistsOverlappingAppointment(request.StaffId, request.StartTime, endTime))
+            if (_appointmentRepository.ExistsOverlappingAppointment(request.StaffId, request.StartTime.TimeOfDay, endTime))
             {
                 throw new Exception("El profesional ya tiene un turno asignado en ese horario.");
             }
 
-            if (_appointmentRepository.ExistsOverlappingAppointmentForClient(request.ClientId, request.StartTime, endTime))
+            if (_appointmentRepository.ExistsOverlappingAppointmentForClient(request.ClientId, request.StartTime.TimeOfDay, endTime))
             {
                 throw new Exception("El cliente ya tiene un turno asignado en ese horario.");
             }
@@ -59,14 +59,14 @@ namespace GestionTurnos.Application.Services
             var existing = _appointmentRepository.GetById(id) 
                 ?? throw new Exception("Turno no encontrado.");
 
-            var endTime = request.StartTime.AddHours(1);
+            var endTime = request.StartTime.TimeOfDay.Add(TimeSpan.FromHours(1));
 
-            if (_appointmentRepository.ExistsOverlappingAppointment(request.StaffId, request.StartTime, endTime, id))
+            if (_appointmentRepository.ExistsOverlappingAppointment(request.StaffId, request.StartTime.TimeOfDay, endTime, id))
             {
                 throw new Exception("El profesional ya tiene un turno asignado en ese horario.");
             }
 
-            if (_appointmentRepository.ExistsOverlappingAppointmentForClient(request.ClientId, request.StartTime, endTime, id))
+            if (_appointmentRepository.ExistsOverlappingAppointmentForClient(request.ClientId, request.StartTime.TimeOfDay, endTime, id))
             {
                 throw new Exception("El cliente ya tiene un turno asignado en ese horario.");
             }
@@ -75,7 +75,7 @@ namespace GestionTurnos.Application.Services
             existing.ClientId = request.ClientId;
             existing.ServiceId = request.ServiceId;
             existing.Day = request.Day;
-            existing.StartTime = request.StartTime;
+            existing.StartTime = request.StartTime.TimeOfDay;
             existing.EndTime = endTime;
             existing.Observation = request.Observation;
             existing.Payment = request.Payment;

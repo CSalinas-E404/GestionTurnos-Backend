@@ -10,14 +10,14 @@ namespace GestionTurnos.Application.Abstraction.Infrastructure
         List<Appointment> GetAll();
         bool ExistsOverlappingAppointment(
         Guid staffId,
-        DateTime startTime,
-        DateTime endTime,
+        TimeSpan startTime,
+        TimeSpan endTime,
         Guid? excludeAppointmentId = null
         );
         bool ExistsOverlappingAppointmentForClient(
         Guid clientId,
-        DateTime startTime,
-        DateTime endTime,
+        TimeSpan startTime,
+        TimeSpan endTime,
         Guid? excludeAppointmentId = null
         );
     }

@@ -1,5 +1,7 @@
 ﻿using GestionTurnos.Application.Abstraction.Infrastructure;
+using GestionTurnos.Application.Exceptions;
 using GestionTurnos.Domain.Entities;
+using GestionTurnos.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestionTurnos.Infrastructure.Persistance.Repository
@@ -10,6 +12,7 @@ namespace GestionTurnos.Infrastructure.Persistance.Repository
         protected readonly FMCTurnosDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
+
         public BaseRepository(FMCTurnosDbContext context)
         {
             _context = context;
@@ -18,23 +21,29 @@ namespace GestionTurnos.Infrastructure.Persistance.Repository
         public virtual T Add(T entity)
         {
             _dbSet.Add(entity);
-            _context.SaveChanges();
+            SaveChanges();
             return entity;
         }
 
         public virtual void Delete(Guid id)
         {
             var EntityUpdate = _dbSet.FirstOrDefault(x => x.Id == id);
+            if (EntityUpdate.IsDeleted == true)
+            {
+                throw new ConflictException("El registro ya se encuentra eliminado.");
+            }
             if (EntityUpdate != null)
             {
-                EntityUpdate?.IsDeleted = true;
+                EntityUpdate.IsDeleted = true;
+                EntityUpdate.DeleteDateTime = DateTime.UtcNow;
+                EntityUpdate.UpdateDateTime = DateTime.UtcNow;
                 _dbSet.Update(EntityUpdate);
-                _context.SaveChanges();
+                SaveChanges();
             }
            
         }
 
-        public virtual List<T> GetAll()
+        public virtual List<T> GetAllGlobal()
         {
             return _dbSet.Where(x => !x.IsDeleted).ToList();
         }
@@ -46,8 +55,20 @@ namespace GestionTurnos.Infrastructure.Persistance.Repository
 
         public virtual void Update(T entity)
         {
-            _context.Set<T>().Update(entity);
-            _context.SaveChanges();
+            _dbSet.Update(entity);
+            SaveChanges();
+        }
+
+        protected void SaveChanges()
+        {
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new DatabaseException("Error al acceder a la base de datos.", ex);
+            }
         }
     }
 }

@@ -1,10 +1,15 @@
 ﻿using GestionTurnos.Application.Abstraction;
+using GestionTurnos.Application.Exceptions;
 using GestionTurnos.Application.Request;
+using GestionTurnos.Application.Response;
 using GestionTurnos.Domain.Entities;
+using GestionTurnos.Presentation.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GestionTurnos.Presentation.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class StaffController : ControllerBase
@@ -15,27 +20,29 @@ namespace GestionTurnos.Presentation.Controllers
         {
             _staffService = staffService;
         }
-
-        [HttpGet]
-        public ActionResult<List<Staff>> GetAll()
+        
+        [Authorize(Policy = Policies.Admin)]
+        [HttpGet("Business/Staffs")]
+        public ActionResult<List<StaffsResponse>> GetStaffOfBusiness() 
         {
 
-            return Ok(_staffService.GetAll());
+            try
+            {
+                var staffs = _staffService.GetStaffOfCurrentBusiness();
+                return Ok(staffs);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Ocurrió un error inesperado y no se pudo obtener la lista de personal.");
+            }
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<Staff> GetById(Guid id)
+        [HttpPost]
+        public ActionResult<Staff> CreateStaffWhitBusiness([FromBody] BusinessRequest user)
         {
-
-            return Ok(_staffService.GetById(id));
+            var newUser = _staffService.CreateStaffWhitBusiness(user);
+            return CreatedAtAction(nameof(GetById), new { id = newUser.Id }, newUser);
         }
-
-        //[HttpPost]
-        //public ActionResult<Staff> CreateStaffWhitBusiness([FromBody] BusinessRequest user)
-        //{
-        //    var newUser = _staffService.CreateStaffWhitBusiness(user);
-        //    return CreatedAtAction(nameof(GetById), new { id = newUser.Id }, newUser);
-        //}
 
         [HttpDelete("{id}")]
         public ActionResult DeleteStaff(Guid id)
@@ -45,11 +52,11 @@ namespace GestionTurnos.Presentation.Controllers
         }
 
         // [Authorize(Policy = "Admin")]
-        //[HttpPut]
-        //public ActionResult<Staff> UpdateStaff([FromBody] Staff user)
-        //{
-        //   var updatedUser = _staffService.UpdateStaff(user);
-        //    return Ok(updatedUser);
-        //}
+        [HttpPut]
+        public ActionResult<Staff> UpdateStaff([FromBody] Staff user)
+        {
+            var updatedUser = _staffService.UpdateStaff(user);
+            return Ok(updatedUser);
+        }
     }
 }

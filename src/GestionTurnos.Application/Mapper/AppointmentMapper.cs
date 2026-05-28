@@ -1,4 +1,4 @@
-﻿using GestionTurnos.Application.Request;
+using GestionTurnos.Application.Request;
 using GestionTurnos.Application.Response;
 using GestionTurnos.Domain.Entities;
 
@@ -17,8 +17,9 @@ namespace GestionTurnos.Application.Mapper
                 ServiceName = appointment.Service.Name,
 
                 Day = appointment.Day,
-                StartTime = appointment.StartTime,
-                EndTime = appointment.EndTime,
+                // Combina la fecha (Day) con el TimeSpan para obtener DateTime
+                StartTime = appointment.Day.Date + appointment.StartTime,
+                EndTime = appointment.Day.Date + appointment.EndTime,
 
                 Observation = appointment.Observation,
 
@@ -37,7 +38,7 @@ namespace GestionTurnos.Application.Mapper
                 ServiceId = request.ServiceId,
 
                 Day = request.Day,
-                StartTime = request.StartTime,
+                StartTime = request.StartTime.TimeOfDay,
 
                 Observation = request.Observation,
 
@@ -46,10 +47,10 @@ namespace GestionTurnos.Application.Mapper
                 Status = AppointmentStatus.Pending,
 
                 // TEMPORAL
-                EndTime = request.StartTime.AddHours(1),
+                EndTime = request.StartTime.AddHours(1).TimeOfDay,
 
                 // TEMPORAL
-                TotalCost = 5000
+                TotalCost = 5000m
             };
         }
     }

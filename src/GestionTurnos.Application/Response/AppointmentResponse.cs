@@ -1,4 +1,4 @@
-﻿namespace GestionTurnos.Application.Response
+namespace GestionTurnos.Application.Response
 {
     public class AppointmentResponse
     {
@@ -17,6 +17,6 @@
         public string Payment { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
 
-        public double TotalCost { get; set; }
+        public decimal TotalCost { get; set; }
     }
 }

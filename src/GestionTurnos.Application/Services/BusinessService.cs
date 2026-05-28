@@ -1,50 +1,62 @@
 ﻿using GestionTurnos.Application.Abstraction;
 using GestionTurnos.Application.Abstraction.Infrastructure;
+using GestionTurnos.Application.Exceptions;
+using GestionTurnos.Application.Mapper;
+using GestionTurnos.Application.Request;
+using GestionTurnos.Application.Response;
 using GestionTurnos.Domain.Entities;
-using System.Xml.Linq;
 
 namespace GestionTurnos.Application.Services
 {
     public class BusinessService : IBusinessService
     {
         private readonly IBusinessRepository _businessRepository;
-        public BusinessService(IBusinessRepository businessRepository)
+        private readonly ITenantProvider _tenantProvider;
+
+        public BusinessService(IBusinessRepository businessRepository, ITenantProvider tenantProvider)
         {
             _businessRepository = businessRepository;
+            _tenantProvider = tenantProvider;
         }
+
         public Business Create(Business business)
         {
-            _businessRepository.Add(business);
-            return business;
+            return _businessRepository.Add(business);
         }
 
-        public void Delete(Guid id)
+        public void Delete()
         {
-
-            _businessRepository.Delete(id);
-             
+            var BusinesId = _tenantProvider.GetBusinessId() ?? throw new ConflictException("No se encontró la empresa.");
+           
+            _businessRepository.Delete(BusinesId);
         }
 
-        public List<Business> GetAll()
+        public List<BusinessDashboardResponse> GetAllGlobal()
         {
-            return _businessRepository.GetAll();
+            return _businessRepository.GetAllGlobal()
+                .Select(b => b.ToResponse())
+                .ToList();
         }
 
-        public List<Staff> GetAllByBusiness(Guid id_Business)
+        public BusinessDashboardResponse GetBusinessEcosystem()
         {
-            return _businessRepository.GetAllByBusiness(id_Business);
+            var business = _businessRepository.GetBusinessWithEcosystem()
+                ?? throw new ConflictException("No se encontró la configuración de su empresa.");
+
+            return business.ToResponse();
         }
 
-        public Business GetById(Guid id)
+        public void Update(BusinessUpdateRequest value)
         {
+            var BusinesId = _tenantProvider.GetBusinessId();
 
-            return _businessRepository.GetById(id);
-        }
+            var existingBusiness = _businessRepository.GetById(BusinesId ?? Guid.Empty)
+                ?? throw new KeyNotFoundException("Empresa no encontrada");
 
-        public void Update(Business value)
-        {
-            var existingClient = _businessRepository.GetById(value.Id) ?? throw new Exception("Empresa no encontrada");
-            _businessRepository.Update(value);
+            existingBusiness.Name = value.Name;
+            
+
+            _businessRepository.Update(existingBusiness);
         }
     }
 }

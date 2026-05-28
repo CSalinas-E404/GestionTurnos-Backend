@@ -1,12 +1,12 @@
 ﻿using GestionTurnos.Application.Request;
+using GestionTurnos.Application.Response;
 using GestionTurnos.Domain.Entities;
 
 namespace GestionTurnos.Application.Mapper
 {
     public static class StaffMapper
     {
-        // Para cuando el negocio ya existe (Método 1)
-        public static Staff ToStaff(this StaffRequest staffRequest, Guid businessId)
+        public static Staff ToStaff(this StaffRequest staffRequest)
         {
             return new Staff
             {
@@ -16,27 +16,49 @@ namespace GestionTurnos.Application.Mapper
                 Password = staffRequest.Password,
                 Phone = staffRequest.Phone,
                 Rol = staffRequest.Rol,
-                LinkPhoto = staffRequest.LinkPhoto,
-                BusinessId = businessId
-                // Business se deja nulo o se cargará por lazy loading/include si es necesario
+                LinkPhoto = staffRequest.LinkPhoto ?? string.Empty,
+                BranchId = staffRequest.BranchId ?? Guid.Empty
             };
         }
 
-        // Para cuando creas el negocio en caliente (Método 2)
-        public static Staff ToStaff(this StaffRequest staffRequest, Business newBusiness)
+        public static StaffsResponse ToResponse(this Staff entity)
         {
-            return new Staff
+            return new StaffsResponse
             {
-                Id = Guid.NewGuid(),
-                Name = staffRequest.Name,
-                Email = staffRequest.Email,
-                Password = staffRequest.Password,
-                Phone = staffRequest.Phone,
-                Rol = staffRequest.Rol,
-                LinkPhoto = staffRequest.LinkPhoto,
-                BusinessId = newBusiness.Id,
-                Business = newBusiness
+                IdStaff = entity.Id,
+                StaffName = entity.Name,
+                StaffEmail = entity.Email,
+                StaffPhone = entity.Phone,
+                Rol = entity.Rol,
+                StaffLinkPhoto = entity.LinkPhoto,
+                BranchId = entity.BranchId,
+                BranchName = entity.Branch?.Name ?? string.Empty,
             };
+        }
+
+        public static GlobalStaffResponse ToGlobalResponse(this Staff entity)
+        {
+            return new GlobalStaffResponse
+            {
+                IdStaff = entity.Id,
+                StaffName = entity.Name,
+                StaffEmail = entity.Email,
+                StaffPhone = entity.Phone,
+                Rol = entity.Rol,
+                StaffLinkPhoto = entity.LinkPhoto,
+                BusinessId = entity.BusinessId,
+                BusinessName = entity.Business != null ? entity.Business.Name : "Desconocido"
+            };
+        }
+
+        public static void UpdateFromDto(this Staff entity, StaffRequest request)
+        {
+            entity.Name = request.Name;
+            entity.Email = request.Email;
+            entity.Password = request.Password;
+            entity.Phone = request.Phone;
+            entity.Rol = request.Rol;
+            entity.LinkPhoto = request.LinkPhoto ?? string.Empty;
         }
     }
 }

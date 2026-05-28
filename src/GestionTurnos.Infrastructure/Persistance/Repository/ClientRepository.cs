@@ -1,26 +1,35 @@
 ﻿using GestionTurnos.Application.Abstraction.Infrastructure;
 using GestionTurnos.Domain.Entities;
+using GestionTurnos.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestionTurnos.Infrastructure.Persistance.Repository
 {
     public class ClientRepository : BaseRepository<Client>, IClientRepository
     {
-        public ClientRepository(FMCTurnosDbContext context) : base(context)
+        private readonly ITenantProvider _tenantProvider;
+        public ClientRepository(FMCTurnosDbContext context, ITenantProvider tenantProvider) : base(context)
         {
+            _tenantProvider = tenantProvider;
         }
         public Client? GetClientByName(string name)
         {
-            return _dbSet.FirstOrDefault(x => x.Name == name && !x.IsDeleted);
+            return _dbSet.FirstOrDefault(x => x.Name.Contains(name) && x.BusinessId == _tenantProvider.GetBusinessId() && !x.IsDeleted);
         }
 
-        public Client? GetClientByNameForBusiness(string name, Guid businessId)
+        public Client? GetClientByEmail(string email)
         {
-            return _dbSet.FirstOrDefault(x => x.Name == name && x.BusinessId == businessId && !x.IsDeleted);
+            return _dbSet.FirstOrDefault(x => x.Email == email && x.BusinessId == _tenantProvider.GetBusinessId() && !x.IsDeleted);
         }
 
-        public List<Client> GetClientsOfBusiness(Guid businessId)
+
+        public override List<Client> GetAllGlobal()
         {
-            return _dbSet.Where(x => x.BusinessId == businessId && !x.IsDeleted).ToList();
+            return _context.Clients
+                           .IgnoreQueryFilters() 
+                           .Where(x => !x.IsDeleted)
+                           .Include(x => x.Business) 
+                           .ToList();
         }
     }
 }
