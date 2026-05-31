@@ -8,6 +8,7 @@ using GestionTurnos.Infrastructure.Persistance;
 using GestionTurnos.Infrastructure.Persistance.Repository;
 using GestionTurnos.Infrastructure.Persistence;
 using GestionTurnos.Presentation.Authorization;
+using GestionTurnos.Presentation.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -33,7 +34,8 @@ builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
 builder.Services.AddScoped<IBusinessService, BusinessService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
-builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddScoped<IBusinessSubscriptionService, BusinessSubscriptionService>();
 
@@ -57,6 +59,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(Policies.Admin, policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
     options.AddPolicy(Policies.Recepcionista, policy => policy.RequireClaim(ClaimTypes.Role, "Recepcionista"));
     options.AddPolicy(Policies.Profesional, policy => policy.RequireClaim(ClaimTypes.Role, "Profesional"));
+    options.AddPolicy(Policies.SysAdmin, policy => policy.RequireClaim(ClaimTypes.Role, "SysAdmin"));
 });
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        .AddJwtBearer(options => {
@@ -83,6 +86,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 
