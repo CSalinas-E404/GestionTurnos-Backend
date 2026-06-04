@@ -7,7 +7,10 @@ namespace GestionTurnos.Application.Abstraction.Infrastructure
 {
     public interface IAppointmentRepository : IBaseRepository<Appointment>
     {
-        List<Appointment> GetAll();
+        List<Appointment> GetByBusinessId(Guid businessId);
+        List<Appointment> GetByBranchId(Guid branchId, Guid businessId);
+        List<Appointment> GetByStaffId(Guid staffId, Guid businessId);
+        Service? GetServiceById(Guid serviceId);
         bool ExistsOverlappingAppointment(
             Guid staffId,
             DateTime day,

@@ -6,6 +6,7 @@ namespace GestionTurnos.Application.Request
     {
         // Datos del turno
         public Guid StaffId { get; set; }
+        public Guid BranchId { get; set; }
         public Guid ServiceId { get; set; }
         public DateTime Day { get; set; }
         public DateTime StartTime { get; set; }

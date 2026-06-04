@@ -5,7 +5,11 @@ namespace GestionTurnos.Application.Abstraction
 {
     public interface IAppointmentService
     {
-        List<AppointmentResponse> GetAll();
+        List<AppointmentResponse> GetAppointmentsOfCurrentBusiness();
+        List<AppointmentResponse> GetAppointmentsOfMyBranch();
+        List<AppointmentResponse> GetMyAppointments();
+        List<AppointmentResponse> GetAppointmentsByBranch(Guid branchId);
+        List<GlobalAppointmentResponse> GetAllGlobal();
         AppointmentResponse CreateAppointment(AppointmentRequest request);
         AppointmentResponse GetById(Guid id);
         AppointmentResponse UpdateAppointment(Guid id, AppointmentRequest request);

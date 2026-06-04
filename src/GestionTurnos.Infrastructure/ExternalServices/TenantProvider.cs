@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using GestionTurnos.Application.Abstraction.Infrastructure;
 using Microsoft.AspNetCore.Http;
 
@@ -26,6 +26,36 @@ namespace GestionTurnos.Infrastructure.ExternalServices
             }
             
             return null;
+        }
+
+        public Guid? GetBranchId()
+        {
+            var claimValue = _httpContextAccessor.HttpContext?.User?.FindFirst("BranchId")?.Value;
+            
+            if (Guid.TryParse(claimValue, out Guid branchId))
+            {
+                return branchId;
+            }
+            
+            return null;
+        }
+
+        public Guid? GetUserId()
+        {
+            var claimValue = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? _httpContextAccessor.HttpContext?.User?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+            
+            if (Guid.TryParse(claimValue, out Guid userId))
+            {
+                return userId;
+            }
+            
+            return null;
+        }
+
+        public string? GetUserRole()
+        {
+            return _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
         }
     } 
 }

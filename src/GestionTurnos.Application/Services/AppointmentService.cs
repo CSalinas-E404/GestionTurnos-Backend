@@ -1,5 +1,6 @@
 using GestionTurnos.Application.Abstraction;
 using GestionTurnos.Application.Abstraction.Infrastructure;
+using GestionTurnos.Application.Exceptions;
 using GestionTurnos.Application.Mapper;
 using GestionTurnos.Application.Request;
 using GestionTurnos.Application.Response;
@@ -12,19 +13,81 @@ namespace GestionTurnos.Application.Services
         private readonly IAppointmentRepository _appointmentRepository;
         private readonly IClientRepository _clientRepository;
         private readonly IStaffRepository _staffRepository;
+        private readonly ITenantProvider _tenantProvider;
 
-        public AppointmentService(IAppointmentRepository appointmentRepository, IClientRepository clientRepository, IStaffRepository staffRepository)
+        public AppointmentService(IAppointmentRepository appointmentRepository, IClientRepository clientRepository, IStaffRepository staffRepository, ITenantProvider tenantProvider)
         {
             _appointmentRepository = appointmentRepository;
             _clientRepository = clientRepository;
             _staffRepository = staffRepository;
+            _tenantProvider = tenantProvider;
         }
 
-        public List<AppointmentResponse> GetAll()
+        public List<GlobalAppointmentResponse> GetAllGlobal()
         {
-            var appointments = _appointmentRepository.GetAll();
+            var appointments = _appointmentRepository.GetAllGlobal();
 
             return appointments
+                .Select(a => a.ToGlobalResponse())
+                .ToList();
+        }
+
+        public List<AppointmentResponse> GetAppointmentsOfCurrentBusiness()
+        {
+            var businessId = _tenantProvider.GetBusinessId()
+                ?? throw new ConflictException("No se encontró la empresa.");
+
+            return _appointmentRepository.GetByBusinessId(businessId)
+                .Select(a => a.ToResponse())
+                .ToList();
+        }
+
+        public List<AppointmentResponse> GetAppointmentsOfMyBranch()
+        {
+            var businessId = _tenantProvider.GetBusinessId()
+                ?? throw new ConflictException("No se encontró la empresa.");
+            
+            var branchId = _tenantProvider.GetBranchId()
+                ?? throw new ConflictException("No se encontró la sucursal asignada al usuario.");
+                
+            var role = _tenantProvider.GetUserRole()
+                ?? throw new ConflictException("No se encontró el rol del usuario.");
+
+            var userId = _tenantProvider.GetUserId()
+                ?? throw new ConflictException("No se encontró el id del usuario.");
+
+            if (Enum.TryParse(role, out Rol userRole) && userRole == Rol.Profesional)
+            {
+                return _appointmentRepository.GetByStaffId(userId, businessId)
+                    .Select(a => a.ToResponse())
+                    .ToList();
+            }
+
+            // Para Recepcionista o Admin, traemos todos los de la sucursal
+            return _appointmentRepository.GetByBranchId(branchId, businessId)
+                .Select(a => a.ToResponse())
+                .ToList();
+        }
+
+        public List<AppointmentResponse> GetMyAppointments()
+        {
+            var businessId = _tenantProvider.GetBusinessId()
+                ?? throw new ConflictException("No se encontró la empresa.");
+            
+            var userId = _tenantProvider.GetUserId()
+                ?? throw new ConflictException("No se encontró el id del usuario.");
+
+            return _appointmentRepository.GetByStaffId(userId, businessId)
+                .Select(a => a.ToResponse())
+                .ToList();
+        }
+
+        public List<AppointmentResponse> GetAppointmentsByBranch(Guid branchId)
+        {
+            var businessId = _tenantProvider.GetBusinessId()
+                ?? throw new ConflictException("No se encontró la empresa.");
+
+            return _appointmentRepository.GetByBranchId(branchId, businessId)
                 .Select(a => a.ToResponse())
                 .ToList();
         }
@@ -42,7 +105,15 @@ namespace GestionTurnos.Application.Services
             var staff = _staffRepository.GetById(request.StaffId)
                 ?? throw new Exception("El profesional no fue encontrado.");
 
-            // 2. Buscar cliente por email. Si no existe, crearlo.
+            // 2. Validar que el staff pertenece a la sucursal indicada
+            if (staff.BranchId != request.BranchId)
+                throw new ConflictException("El profesional seleccionado no pertenece a esta sucursal.");
+
+            // 3. Obtener el servicio para calcular el costo real
+            var service = _appointmentRepository.GetServiceById(request.ServiceId)
+                ?? throw new Exception("El servicio no fue encontrado.");
+
+            // 3. Busco cliente por email. Si no existe, se crea.
             var client = _clientRepository.GetClientByEmail(request.ClientEmail);
 
             if (client == null)
@@ -61,7 +132,7 @@ namespace GestionTurnos.Application.Services
 
             var clientId = client.Id;
 
-            // 2. Verificar solapamiento de horarios
+            // 4. Verifico solapamiento de horarios
             var endTime = request.StartTime.TimeOfDay.Add(TimeSpan.FromHours(1));
 
             if (_appointmentRepository.ExistsOverlappingAppointment(request.StaffId, request.Day, request.StartTime.TimeOfDay, endTime))
@@ -74,8 +145,8 @@ namespace GestionTurnos.Application.Services
                 throw new Exception("El cliente ya tiene un turno asignado en ese horario.");
             }
 
-            // 3. Crear el turno con el clientId resuelto
-            var appointment = request.ToEntity(clientId);
+            // 5. Crear el turno usando el precio real del servicio
+            var appointment = request.ToEntity(clientId, service.Price);
             var appointmentCreated = _appointmentRepository.Add(appointment);
 
             var fullyLoaded = _appointmentRepository.GetById(appointmentCreated.Id) 

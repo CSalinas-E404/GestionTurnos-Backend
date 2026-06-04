@@ -24,6 +24,47 @@ namespace GestionTurnos.Infrastructure.Persistance.Repository
                 .ToList();
         }
 
+        public new List<Appointment> GetAllGlobal()
+        {
+            return _dbSet
+                .Include(a => a.Client)
+                .Include(a => a.Staff)
+                    .ThenInclude(s => s.Business)
+                .Include(a => a.Service)
+                .Where(a => !a.IsDeleted)
+                .ToList();
+        }
+
+        public List<Appointment> GetByBusinessId(Guid businessId)
+        {
+            return _dbSet
+                .Include(a => a.Client)
+                .Include(a => a.Staff)
+                .Include(a => a.Service)
+                .Where(a => !a.IsDeleted && a.Staff.BusinessId == businessId)
+                .ToList();
+        }
+
+        public List<Appointment> GetByBranchId(Guid branchId, Guid businessId)
+        {
+            return _dbSet
+                .Include(a => a.Client)
+                .Include(a => a.Staff)
+                .Include(a => a.Service)
+                .Where(a => !a.IsDeleted && a.Staff.BranchId == branchId && a.Staff.BusinessId == businessId)
+                .ToList();
+        }
+
+        public List<Appointment> GetByStaffId(Guid staffId, Guid businessId)
+        {
+            return _dbSet
+                .Include(a => a.Client)
+                .Include(a => a.Staff)
+                .Include(a => a.Service)
+                .Where(a => !a.IsDeleted && a.StaffId == staffId && a.Staff.BusinessId == businessId)
+                .ToList();
+        }
+
         public override Appointment? GetById(Guid id)
         {
             return _dbSet
@@ -31,6 +72,11 @@ namespace GestionTurnos.Infrastructure.Persistance.Repository
                 .Include(a => a.Staff)
                 .Include(a => a.Service)
                 .FirstOrDefault(a => a.Id == id && !a.IsDeleted);
+        }
+
+        public Service? GetServiceById(Guid serviceId)
+        {
+            return _context.Set<Service>().FirstOrDefault(s => s.Id == serviceId);
         }
 
         public bool ExistsOverlappingAppointment(Guid staffId, DateTime day, TimeSpan startTime, TimeSpan endTime, Guid? excludeAppointmentId = null)
