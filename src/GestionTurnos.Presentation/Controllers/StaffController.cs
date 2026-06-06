@@ -24,16 +24,9 @@ namespace GestionTurnos.Presentation.Controllers
         [HttpGet("Business/Staffs")]
         public ActionResult<List<StaffsResponse>> GetStaffOfBusiness()
         {
-
-            try
-            {
                 var staffs = _staffService.GetStaffOfCurrentBusiness();
                 return Ok(staffs);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrió un error inesperado y no se pudo obtener la lista de personal.");
-            }
+
         }
         [Authorize(Policy = Policies.Admin)]
         [HttpPost]

@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GestionTurnos.Presentation.Controllers
 {
-    [Authorize(Roles = Policies.Admin)]
-    [Authorize(Roles = Policies.Recepcionista)]
+    [Authorize(Policy = "AdminOrRecepcionista")]
+
     [Route("api/[controller]")]
     [ApiController]
     public class ClientController : ControllerBase
@@ -20,7 +20,8 @@ namespace GestionTurnos.Presentation.Controllers
             _clientService = clientService;
         }
 
-        [Authorize(Policy = Policies.Admin)]
+        [Authorize(Policy = "AdminOrRecepcionista")]
+
         [HttpGet]
         public ActionResult<List<ClientsResponse>> GetAll()
         {
@@ -28,16 +29,14 @@ namespace GestionTurnos.Presentation.Controllers
         }
 
 
-        [Authorize(Policy = Policies.Admin)]
-        [Authorize(Policy = Policies.Recepcionista)]
+        [Authorize(Policy = "AdminOrRecepcionista")]
         [HttpGet("{id}")]
         public ActionResult<ClientsResponse> GetById([FromRoute] Guid id)
         {
             return Ok(_clientService.GetById(id));
         }
 
-        [Authorize(Policy = Policies.Admin)]
-        [Authorize(Policy = Policies.Recepcionista)]
+        [Authorize(Policy = "AdminOrRecepcionista")]
         [HttpGet("search")]
         public ActionResult<ClientsResponse> GetByName([FromQuery] string name)
         {

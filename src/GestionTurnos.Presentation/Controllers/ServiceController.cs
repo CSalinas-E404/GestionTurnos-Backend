@@ -20,7 +20,7 @@ namespace GestionTurnos.Presentation.Controllers
             _serviceService = serviceService;
         }
 
-        
+
         [HttpPost]
         public IActionResult CreateService(ServiceRequest request)
         {
@@ -28,7 +28,14 @@ namespace GestionTurnos.Presentation.Controllers
             return Ok();
         }
 
+        [HttpGet]
 
-        
+        public IActionResult GetServicesOfCurrentBusiness()
+        {
+           var Services = _serviceService.GetServicesOfCurrentBusiness();
+            return Ok(Services);
+        }
+
+
     }
 }

@@ -1,5 +1,6 @@
 using GestionTurnos.Application.Request;
 using GestionTurnos.Application.Response;
+using GestionTurnos.Domain.Entities;
 
 namespace GestionTurnos.Application.Abstraction
 {
@@ -11,5 +12,6 @@ namespace GestionTurnos.Application.Abstraction
         BusinessSubscriptionResponse Create(BusinessSubscriptionRequest request);
         BusinessSubscriptionResponse UpdateStatus(Guid id, string status);
         void Delete(Guid id);
+        void InitialBusinessSubscription(SignUpRequest request, Business newBusiness);
     }
 }

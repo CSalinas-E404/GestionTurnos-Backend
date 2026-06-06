@@ -27,7 +27,7 @@ namespace GestionTurnos.Application.Services
         public void Delete()
         {
             var BusinesId = _tenantProvider.GetBusinessId() ?? throw new ConflictException("No se encontró la empresa.");
-           
+
             _businessRepository.Delete(BusinesId);
         }
 
@@ -42,7 +42,7 @@ namespace GestionTurnos.Application.Services
         {
             var business = _businessRepository.GetById(id) ?? throw new ConflictException("Empresa no encontrada.");
             return business;
-        }   
+        }
         public BusinessDashboardResponse GetBusinessEcosystem()
         {
             var business = _businessRepository.GetBusinessWithEcosystem()
@@ -59,9 +59,21 @@ namespace GestionTurnos.Application.Services
                 ?? throw new KeyNotFoundException("Empresa no encontrada");
 
             existingBusiness.Name = value.Name;
-            
+
 
             _businessRepository.Update(existingBusiness);
+        }
+
+        public Business initialBusiness(SignUpRequest request, TypeBusiness typeBusinessParsed)
+        {
+            var newBusiness = new Business
+            {
+                Id = Guid.NewGuid(),
+                Name = $"{request.Name} - {request.BusinessCategory}",
+                Url = $"http://www.{request.Name.Replace(" ", "")}.FCMTurniFy.com",
+                TypeBusiness = typeBusinessParsed
+            };
+            return newBusiness;
         }
     }
 }
