@@ -5,6 +5,7 @@ using GestionTurnos.Application.Exceptions;
 using GestionTurnos.Application.Mapper;
 using GestionTurnos.Application.Request;
 using GestionTurnos.Application.Response;
+using GestionTurnos.Application.Services;
 using GestionTurnos.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -27,22 +28,22 @@ namespace GestionTurnos.Infrastructure.ExternalServices
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IScheduleService _scheduleService;
         private readonly ISysAdminService _sysAdminService;
+        private readonly IBusinessService _businessService;
+        private readonly IBusinessSubscriptionService _businessSubscriptionService;
 
 
         public AuthService(IStaffRepository staffRepository, 
-            IPlanRepository planRepository, 
-            IBusinessSubscriptionRepository BusinessSubscriptionRepository,
             IConfiguration configuration, IEmailService emailService,
             IEmailContentBuilder emailContentBuilder,
             IBranchService branchService,   
             IScheduleService scheduleService,
             IHttpContextAccessor httpContextAccessor,
-            ISysAdminService sysAdminService
-            )
+            ISysAdminService sysAdminService,
+            IBusinessService businessService,
+            IBusinessSubscriptionService businessSubscriptionService)
+            
         {
             _staffRepository = staffRepository;
-            _planRepository = planRepository;
-            _BusinessSubscriptionRepository = BusinessSubscriptionRepository;
             _configuration = configuration;
             _emailService = emailService;
             _branchService = branchService;
@@ -50,6 +51,8 @@ namespace GestionTurnos.Infrastructure.ExternalServices
             _httpContextAccessor = httpContextAccessor;
             _scheduleService = scheduleService;
             _sysAdminService = sysAdminService;
+            _businessService = businessService;
+            _businessSubscriptionService = businessSubscriptionService;
         }
 
         public AuthResponse? SignUp(SignUpRequest request)
@@ -80,31 +83,14 @@ namespace GestionTurnos.Infrastructure.ExternalServices
                     ?? throw new ConflictException("El plan especificado no existe.");
             }
 
-            var newBusiness = new Business
-            {
-                Id = Guid.NewGuid(),
-                Name = $"{request.Name} - {request.BusinessCategory}",
-                Url = $"http://www.{request.Name.Replace(" ", "")}.FCMTurniFy.com",
-                TypeBusiness = typeBusinessParsed
-            };
-
-            var BusinessSubscription = new BusinessSubscription
-            {
-                Id = Guid.NewGuid(),
-                BusinessId = newBusiness.Id,
-                Business = newBusiness,
-                PlanId = request.Plan.Id,
-                Plan = request.Plan,
-                StartDate = DateTime.UtcNow,
-                EndDate = DateTime.UtcNow + TimeSpan.FromDays(request.Plan.DurationDays),
-                Status = Status.Active
-            };
+            var newBusiness = _businessService.initialBusiness(request, typeBusinessParsed);
 
             var newBranch = _branchService.CreateInitialBranch(request, newBusiness);
 
             var newStaff = request.ToRegisterNewBusinessAndStaff(newBusiness, newBranch);
             _staffRepository.Add(newStaff);
-            _BusinessSubscriptionRepository.Add(BusinessSubscription);
+            _businessSubscriptionService.InitialBusinessSubscription(request,newBusiness);
+            
 
             return new AuthResponse
             {
@@ -115,9 +101,7 @@ namespace GestionTurnos.Infrastructure.ExternalServices
 
         public AuthResponse? SignIn(SignInRequest request)
         {
-            var user = _staffRepository
-      .GetAllGlobal()
-      .FirstOrDefault(s => s.Email == request.Email);
+            var user = _staffRepository.GetAllGlobal().FirstOrDefault(s => s.Email == request.Email);
 
             var sysAdmin = _sysAdminService.GetByEmail(request.Email);
 

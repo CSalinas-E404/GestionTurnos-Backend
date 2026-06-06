@@ -23,7 +23,7 @@ namespace GestionTurnos.Application.Services
         {
             var sysAdmin = _sysAdminRepository.GetByEmail(email);
             if (sysAdmin == null)
-                throw new NotFoundException("SysAdmin not found");
+                return null;
             return sysAdmin;
         }
     }

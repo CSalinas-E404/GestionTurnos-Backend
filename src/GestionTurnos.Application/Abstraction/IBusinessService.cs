@@ -16,5 +16,7 @@ namespace GestionTurnos.Application.Abstraction
         void Update(BusinessUpdateRequest value);
 
         Business GetById(Guid id);
+
+        Business initialBusiness(SignUpRequest request, TypeBusiness typeBusinessParsed);
     }
 }
